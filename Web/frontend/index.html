@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Irrigação APAE - Dashboard</title>
+    <link rel="stylesheet" href="../frontend/css/index.css">
+    <!-- FontAwesome para Ícones -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="icon" href="../frontend/assets/APAE-logo.jpeg">
+</head>
+<body>
+
+    <div class="dashboard-container">
+        <!-- SIDEBAR -->
+        <aside class="sidebar">
+            <div class="sidebar-logo">
+                <i class="fa-solid fa-seedling"></i>
+            </div>
+            <nav class="sidebar-nav">
+                <a href="#" class="nav-item active" title="Dashboard"><i class="fa-solid fa-house"></i></a>
+                <a href="#" class="nav-item" title="Usuário"><i class="fa-solid fa-user"></i></a>
+            </nav>
+        </aside>
+
+        <!-- CONTEÚDO PRINCIPAL -->
+        <main class="main-content">
+            <!-- CABEÇALHO -->
+            <header class="top-header">
+                <!-- Status da Bomba no Canto Superior Esquerdo -->
+                <div class="pump-status-card" id="pumpStatusCard">
+                    <div class="pump-indicator" id="pumpIndicator"></div>
+                    <div class="pump-info">
+                        <span class="pump-label">Status da Bomba</span>
+                        <span class="pump-state" id="pumpStateText">DESLIGADA</span>
+                    </div>
+                </div>
+
+                <div class="header-right">
+                    <span class="user-profile">Sistema de Irrigação - APAE</span>
+                    <button class="icon-btn" title="Buscar"><i class="fa-solid fa-magnifying-glass"></i></button>
+                </div>
+            </header>
+
+            <!-- GRID PRINCIPAL -->
+            <div class="dashboard-grid">
+                
+                <!-- SEÇÃO DO CALENDÁRIO -->
+                <section class="calendar-section">
+                    <div class="calendar-header">
+                        <h2 id="monthYearDisplay">MARCH 2026</h2>
+                        <div class="calendar-nav-btns">
+                            <button id="prevMonth"><i class="fa-solid fa-chevron-left"></i></button>
+                            <button id="nextMonth"><i class="fa-solid fa-chevron-right"></i></button>
+                        </div>
+                    </div>
+
+                    <div class="weekdays-grid">
+                        <span>DOM</span><span>SEG</span><span>TER</span><span>QUA</span><span>QUI</span><span>SEX</span><span>SÁB</span>
+                    </div>
+
+                    <div class="days-grid" id="daysGrid">
+                        <!-- Preenchido via JavaScript -->
+                    </div>
+                </section>
+
+                <!-- PAINEL LATERAL DIREITO -->
+                <div class="right-panels">
+                    
+                    <!-- CONTROLE MANUAL DA BOMBA -->
+                    <section class="panel-box control-panel">
+                        <div class="panel-header-row">
+                            <h3>CONTROLE MANUAL</h3>
+                            <i class="fa-solid fa-bolt icon-yellow"></i>
+                        </div>
+                        <p class="panel-desc">Clique no botão para ligar ou desligar o sistema de rega.</p>
+                        <button class="manual-toggle-btn off" id="manualToggleBtn">
+                            <i class="fa-solid fa-power-off"></i>
+                            <span id="manualBtnText">LIGAR BOMBA AGORA</span>
+                        </button>
+                    </section>
+
+                    <!-- PRÓXIMAS REGAS (EVENTOS) -->
+                    <section class="panel-box">
+                        <div class="panel-header-row">
+                            <h3>Irrigações em horários especiais</h3>
+                            <i class="fa-solid fa-chevron-down"></i>
+                        </div>
+                        <div class="events-list" id="eventsList">
+                            <!-- Itens injetados via JS -->
+                        </div>
+                    </section>
+
+                    <!-- HISTÓRICO RECENTE -->
+                    <section class="panel-box">
+                        <div class="panel-header-row">
+                            <h3>ATIVIDADES RECENTES</h3>
+                            <i class="fa-solid fa-chevron-down"></i>
+                        </div>
+                        <div class="activities-list">
+                            <!-- Injetado via JS -->
+                        </div>
+                    </section>
+
+                </div>
+
+            </div>
+        </main>
+    </div>
+
+    <!-- MODAL PARA AGENDAR IRRIGAÇÃO -->
+    <div class="modal-overlay" id="scheduleModal">
+        <div class="modal-content">
+            <h3>Programar Irrigação</h3>
+            <form id="scheduleForm">
+                <div class="form-group">
+                    <label for="eventDate">Dia do Mês</label>
+                    <input type="number" id="eventDate" min="1" max="31" readonly required>
+                </div>
+                <div class="form-group">
+                    <label for="eventTime">Horário de Início</label>
+                    <input type="time" id="eventTime" required>
+                </div>
+                <div class="form-group">
+                    <label for="eventDuration">Duração (minutos)</label>
+                    <input type="number" id="eventDuration" min="1" placeholder="Ex: 15" required>
+                </div>
+                <div class="modal-actions">
+                    <button type="button" class="btn-cancel" id="closeModalBtn">Cancelar</button>
+                    <button type="submit" class="btn-save">Salvar</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script src="../frontend/js/index.js"></script>
+</body>
+</html>

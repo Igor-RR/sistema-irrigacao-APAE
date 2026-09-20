@@ -549,3 +549,15 @@ body {
     background: var(--accent-yellow-solid);
     color: #ffffff;
 }
+
+.day-cell.past-day {
+    color: var(--text-muted);
+    background-color: transparent;
+    opacity: 0.4;
+    cursor: not-allowed;
+}
+
+.day-cell.past-day:hover {
+    background-color: transparent;
+    border-color: transparent;
+}

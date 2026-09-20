@@ -4,12 +4,12 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Irrigação APAE - Dashboard</title>
-    <link rel="stylesheet" href="../frontend/css/index.css">
+    <link rel="stylesheet" href="{{ url_for('static', path='css/index.css') }}">
     <!-- FontAwesome para Ícones -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <!-- Google Fonts -->
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-    <link rel="icon" href="../frontend/assets/APAE-logo.jpeg">
+    <link rel="icon" href="{{ url_for('static', path='assets/APAE-logo.jpeg') }}">
 </head>
 <body>
 
@@ -135,6 +135,6 @@
         </div>
     </div>
 
-    <script src="../frontend/js/index.js"></script>
+    <script src="{{ url_for('static', path='js/index.js') }}"></script>
 </body>
 </html>

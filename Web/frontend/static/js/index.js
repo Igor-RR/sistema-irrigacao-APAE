@@ -1,3 +1,5 @@
+import enviar_estado_botao from "./api"
+
 // Elementos da Interface
 const pumpIndicator = document.getElementById('pumpIndicator');
 const pumpStateText = document.getElementById('pumpStateText');
@@ -24,7 +26,8 @@ let scheduledEvents = [
 // Alternar Estado da Bomba (Manual)
 manualToggleBtn.addEventListener('click', () => {
     isPumpOn = !isPumpOn;
-    updatePumpUI();
+    updatePumpUI()
+    enviar_estado_botao(isPumpOn);
 });
 
 function updatePumpUI() {
@@ -51,13 +54,11 @@ function updatePumpUI() {
 function renderCalendar() {
     daysGrid.innerHTML = '';
     
-    // Pega a data atual do sistema (Setembro de 2026)
     const today = new Date();
     const currentYear = today.getFullYear();
-    const currentMonth = today.getMonth(); // 0 = Janeiro, 8 = Setembro
-    const currentDay = today.getDate();    // 17
+    const currentMonth = today.getMonth(); 
+    const currentDay = today.getDate();    // Data de hoje (ex: 18)
 
-    // Nomes dos meses para exibir no cabeçalho
     const monthNames = [
         "JANEIRO", "FEVEREIRO", "MARÇO", "ABRIL", "MAIO", "JUNHO", 
         "JULHO", "AGOSTO", "SETEMBRO", "OUTUBRO", "NOVEMBRO", "DEZEMBRO"
@@ -67,13 +68,10 @@ function renderCalendar() {
         monthYearDisplay.textContent = `${monthNames[currentMonth]} ${currentYear}`;
     }
     
-    // Descobrir o dia da semana em que o mês começa (0 = Domingo)
     const firstDayIndex = new Date(currentYear, currentMonth, 1).getDay();
-    
-    // Descobrir o total de dias do mês atual
     const totalDays = new Date(currentYear, currentMonth + 1, 0).getDate();
 
-    // 1. Adicionar espaços vazios para alinhar o primeiro dia da semana
+    // Espaços vazios iniciais
     for (let i = 0; i < firstDayIndex; i++) {
         const emptyCell = document.createElement('div');
         emptyCell.classList.add('day-cell', 'empty-cell');
@@ -81,28 +79,36 @@ function renderCalendar() {
         daysGrid.appendChild(emptyCell);
     }
 
-    // 2. Renderizar todos os dias do mês atual
+    // Renderizar dias do mês
     for (let day = 1; day <= totalDays; day++) {
         const dayCell = document.createElement('div');
         dayCell.classList.add('day-cell');
         dayCell.textContent = day;
 
-        // Verificar se há evento neste dia para destacar em amarelo
-        const hasEvent = scheduledEvents.some(ev => ev.date === day);
-        if (hasEvent) {
-            dayCell.classList.add('highlight-day');
+        // Verificar se o dia já passou
+        const isPastDay = day < currentDay;
+
+        if (isPastDay) {
+            // Se já passou, adiciona classe visual de desativado e NÃO permite clique
+            dayCell.classList.add('past-day');
+        } else {
+            // Se é hoje ou futuro, permite o clique para agendar
+            dayCell.addEventListener('click', () => {
+                eventDateInput.value = day;
+                scheduleModal.classList.add('open');
+            });
         }
 
-        // Destacar o dia de hoje (ex: 17) em verde
+        // Destacar o dia de hoje
         if (day === currentDay) {
             dayCell.classList.add('active-day');
         }
 
-        // Ao clicar no dia, preenche o campo de data e abre o modal
-        dayCell.addEventListener('click', () => {
-            eventDateInput.value = day;
-            scheduleModal.classList.add('open');
-        });
+        // Verificar se há evento neste dia
+        const hasEvent = scheduledEvents.some(ev => ev.date === day);
+        if (hasEvent) {
+            dayCell.classList.add('highlight-day');
+        }
 
         daysGrid.appendChild(dayCell);
     }
@@ -135,16 +141,39 @@ scheduleForm.addEventListener('submit', (e) => {
     e.preventDefault();
     
     const date = parseInt(eventDateInput.value);
-    const init = document.getElementById('eventTime').value;
+    const init = document.getElementById('eventTime').value; // Ex: "14:30"
     const duration = document.getElementById('eventDuration').value;
 
-    if (date && init && duration) {
-        scheduledEvents.push({ date, init, duration });
-        renderCalendar();
-        renderEvents();
-        scheduleForm.reset();
-        scheduleModal.classList.remove('open');
+    if (!date || !init || !duration) {
+        alert('Por favor, preencha todos os campos.');
+        return;
     }
+
+    // Validação de Hora para o dia de hoje
+    const today = new Date();
+    const currentDay = today.getDate();
+    const currentMonth = today.getMonth();
+    const currentYear = today.getFullYear();
+
+    // Se o usuário selecionou o dia de hoje, precisamos checar o horário
+    if (date === currentDay) {
+        const [hours, minutes] = init.split(':').map(Number);
+        
+        const selectedTimeMinutes = hours * 60 + minutes;
+        const currentTimeMinutes = today.getHours() * 60 + today.getMinutes();
+
+        if (selectedTimeMinutes <= currentTimeMinutes) {
+            alert('Você não pode agendar uma irrigação para um horário que já passou hoje!');
+            return; // Impede o envio do formulário
+        }
+    }
+
+    // Se passou na validação, adiciona o evento normalmente
+    scheduledEvents.push({ date, init, duration });
+    renderCalendar();
+    renderEvents();
+    scheduleForm.reset();
+    scheduleModal.classList.remove('open');
 });
 
 // Inicialização

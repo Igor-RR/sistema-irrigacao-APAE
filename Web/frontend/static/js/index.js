@@ -1,4 +1,4 @@
-import enviar_estado_botao from "./api"
+import {enviar_estado_botao} from "./api.js"
 
 // Elementos da Interface
 const pumpIndicator = document.getElementById('pumpIndicator');
@@ -25,6 +25,7 @@ let scheduledEvents = [
 
 // Alternar Estado da Bomba (Manual)
 manualToggleBtn.addEventListener('click', () => {
+    console.log("Botão foi clicado!");
     isPumpOn = !isPumpOn;
     updatePumpUI()
     enviar_estado_botao(isPumpOn);

@@ -1,4 +1,5 @@
 import {enviar_estado_botao} from "./api.js"
+import { enviar_agendamento } from "./api.js";
 
 // Elementos da Interface
 const pumpIndicator = document.getElementById('pumpIndicator');
@@ -143,7 +144,7 @@ scheduleForm.addEventListener('submit', (e) => {
     
     const date = parseInt(eventDateInput.value);
     const init = document.getElementById('eventTime').value; // Ex: "14:30"
-    const duration = document.getElementById('eventDuration').value;
+    const duration = parseInt(document.getElementById('eventDuration').value);
 
     if (!date || !init || !duration) {
         alert('Por favor, preencha todos os campos.');
@@ -171,6 +172,7 @@ scheduleForm.addEventListener('submit', (e) => {
 
     // Se passou na validação, adiciona o evento normalmente
     scheduledEvents.push({ date, init, duration });
+    enviar_agendamento(date,init,duration);
     renderCalendar();
     renderEvents();
     scheduleForm.reset();

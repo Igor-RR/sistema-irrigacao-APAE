@@ -17,7 +17,7 @@ class EstadoBomba(BaseModel):
     estado: bool
     
 class Agendamento(BaseModel):
-    dia: str
+    dia: int
     horario: str
     duracao: int
 
@@ -45,8 +45,12 @@ def receber_estado_botao(dado:EstadoBomba):
 
 # Rota para o envio da programação da bomba
 @app.post("/api/agendamento")
-def receber_agendamento():
-    print("")
+def receber_agendamento(dado:Agendamento):
+    print("Agendamento recebido!")
+    print(f"Dia: {dado.dia}")
+    print(f"Início: {dado.horario}")
+    print(f"Duração: {dado.duracao}")
+
 
 # Subir servidor
 if __name__ == "__main__":

@@ -1,4 +1,4 @@
-// ------ Este arquivo contém a funções para requisições do frontend ------/
+// ------ Este arquivo contém as funções para requisições do frontend ------/
 
 export async function enviar_estado_botao(estado){
     await fetch("/api/botaoBomba",

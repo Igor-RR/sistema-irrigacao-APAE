@@ -3,7 +3,7 @@ from dotenv import load_dotenv
 import os
 
 # Importação do servidor fastapi
-from fastapi import FastAPI,Request
+from fastapi import FastAPI, HTTPException,Request
 from fastapi.responses import HTMLResponse
 from fastapi.templating import Jinja2Templates
 from fastapi.staticfiles import StaticFiles
@@ -20,11 +20,12 @@ from firebase_admin import credentials, db
 load_dotenv()
 firebase_url = os.getenv("FIREBASE_URL")
 
-# inicializa o sdk python do firebase
-cred = credentials.Certificate("serviceAccountKey.json")
-firebase.initialize_app(cred, {
-    'databaseURL': str(firebase_url)  # Substitua pela URL do seu Realtime Database
-})
+if not firebase._apps:
+    # inicializa o sdk python do firebase
+    cred = credentials.Certificate("serviceAccountKey.json")
+    firebase.initialize_app(cred, {
+        'databaseURL': str(firebase_url)  # Substitua pela URL do seu Realtime Database
+    })
 
 
 # Diretório onde estão as páginas
@@ -62,17 +63,36 @@ def painel_principal(request:Request):
 # Rota para o envio do estado do botão da bomba
 @app.post("/api/botaoBomba")
 def receber_estado_botao(dado:EstadoBomba):
-    print(f"O estado foi recebido:{dado.estado}")
+    try:
+        conexao = db.reference("/estadoBotaoBomba")
+        novo_estado = conexao.push({
+            "estado":dado.estado
+        })
+        print(f"Estado do botão atualizado no FireBase, ID:{novo_estado.key}")
+        return {"status": "sucesso", "id": novo_estado.key}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+        
 
-    return {"status": "sucesso", "estado_atual": dado.estado}
+    
 
 # Rota para o envio da programação da bomba
 @app.post("/api/agendamento")
 def receber_agendamento(dado:Agendamento):
-    print("Agendamento recebido!")
-    print(f"Dia: {dado.dia}")
-    print(f"Início: {dado.horario}")
-    print(f"Duração: {dado.duracao}")
+    try:
+        conexao = db.reference("/programacoes") # Conexão com Realtimedatabase
+        # o método push envia para o payload para o Realtime Database
+        novo_evento = conexao.push({
+            "dia":dado.dia,
+            "horario":dado.horario,
+            "duracao":dado.duracao
+        })
+
+        print(f"Agendamento enviado ao FireBase com ID:{novo_evento.key}")
+        return {"status": "sucesso", "id": novo_evento.key}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
 
 
 # Subir servidor

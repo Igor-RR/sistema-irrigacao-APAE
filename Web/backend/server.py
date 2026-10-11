@@ -60,12 +60,33 @@ def painel_principal(request:Request):
         context={}
         )
 
-# Rota para o envio do estado do botão da bomba
-@app.post("/api/botaoBomba")
-def receber_estado_botao(dado:EstadoBomba):
+# Rota para consultar o estado do botão (Frontend <- RTDB)
+@app.get("/api/botaoBomba")
+def enviar_estado_botao_front():
     try:
-        conexao = db.reference("/estadoBotaoBomba")
-        novo_estado = conexao.push({
+        conexao = db.reference("/estadoBomba")
+        dados = conexao.get()
+        return dados if dados else {"estado":None}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+# Rota para consultar consultar todos os eventos (Frontend <- RTDB)
+@app.get("/api/agendamento")
+def enviar_agendamentos_front():
+    try:
+        conexao = db.reference("/programacoes")
+        dados = conexao.get()
+        return dados if dados else {"Não existem agendamentos cadastrados"}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+# Rota para o envio do estado do botão da bomba (Frontend -> RTDB)
+@app.post("/api/botaoBomba")
+def enviar_estado_botao_firebase(dado:EstadoBomba):
+    try:
+        conexao = db.reference("/estadoBomba")
+        novo_estado = conexao.set({
             "estado":dado.estado
         })
         print(f"Estado do botão atualizado no FireBase, ID:{novo_estado.key}")
@@ -74,11 +95,9 @@ def receber_estado_botao(dado:EstadoBomba):
         raise HTTPException(status_code=500, detail=str(e))
         
 
-    
-
-# Rota para o envio da programação da bomba
+# Rota para o envio da programação da bomba (Frontend -> RTDB)
 @app.post("/api/agendamento")
-def receber_agendamento(dado:Agendamento):
+def enviar_agendamento_firebase(dado:Agendamento):
     try:
         conexao = db.reference("/programacoes") # Conexão com Realtimedatabase
         # o método push envia para o payload para o Realtime Database

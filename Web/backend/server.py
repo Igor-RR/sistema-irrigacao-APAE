@@ -62,7 +62,7 @@ def painel_principal(request:Request):
 
 # Rota para consultar o estado do botão (Frontend <- RTDB)
 @app.get("/api/botaoBomba")
-def enviar_estado_botao_front():
+def consultar_estado_botao():
     try:
         conexao = db.reference("/estadoBomba")
         dados = conexao.get()
@@ -73,7 +73,7 @@ def enviar_estado_botao_front():
 
 # Rota para consultar consultar todos os eventos (Frontend <- RTDB)
 @app.get("/api/agendamento")
-def enviar_agendamentos_front():
+def consultar_agendamentos():
     try:
         conexao = db.reference("/programacoes")
         dados = conexao.get()
@@ -83,7 +83,7 @@ def enviar_agendamentos_front():
 
 # Rota para o envio do estado do botão da bomba (Frontend -> RTDB)
 @app.post("/api/botaoBomba")
-def enviar_estado_botao_firebase(dado:EstadoBomba):
+def enviar_estado_botao(dado:EstadoBomba):
     try:
         conexao = db.reference("/estadoBomba")
         novo_estado = conexao.set({
@@ -97,7 +97,7 @@ def enviar_estado_botao_firebase(dado:EstadoBomba):
 
 # Rota para o envio da programação da bomba (Frontend -> RTDB)
 @app.post("/api/agendamento")
-def enviar_agendamento_firebase(dado:Agendamento):
+def enviar_agendamento(dado:Agendamento):
     try:
         conexao = db.reference("/programacoes") # Conexão com Realtimedatabase
         # o método push envia para o payload para o Realtime Database

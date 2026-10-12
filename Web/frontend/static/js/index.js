@@ -1,5 +1,4 @@
-import {enviar_estado_botao} from "./api.js"
-import { enviar_agendamento } from "./api.js";
+import { enviar_estado_bomba, enviar_agendamento, coletar_estado_bomba, coletar_agendamentos } from "./api.js";
 
 // Elementos da Interface
 const pumpIndicator = document.getElementById('pumpIndicator');
@@ -19,17 +18,15 @@ const eventDateInput = document.getElementById('eventDate');
 // Estado da Bomba
 let isPumpOn = false;
 
-// Lista inicial de programações de irrigação (ajustada para o mês atual, ex: dia 20)
-let scheduledEvents = [
-    { date: 20, init: '06:00', duration: '15' }
-];
+// Lista de programações de irrigação vindas do backend
+let scheduledEvents = [];
 
 // Alternar Estado da Bomba (Manual)
 manualToggleBtn.addEventListener('click', () => {
     console.log("Botão foi clicado!");
     isPumpOn = !isPumpOn;
-    updatePumpUI()
-    enviar_estado_botao(isPumpOn);
+    updatePumpUI();
+    enviar_estado_bomba(isPumpOn);
 });
 
 function updatePumpUI() {
@@ -52,14 +49,14 @@ function updatePumpUI() {
     }
 }
 
-// Renderizar Calendário Dinâmico Baseado na Data Atual
+// Renderizar Calendário Dinâmico
 function renderCalendar() {
     daysGrid.innerHTML = '';
     
     const today = new Date();
     const currentYear = today.getFullYear();
     const currentMonth = today.getMonth(); 
-    const currentDay = today.getDate();    // Data de hoje (ex: 18)
+    const currentDay = today.getDate();
 
     const monthNames = [
         "JANEIRO", "FEVEREIRO", "MARÇO", "ABRIL", "MAIO", "JUNHO", 
@@ -73,7 +70,6 @@ function renderCalendar() {
     const firstDayIndex = new Date(currentYear, currentMonth, 1).getDay();
     const totalDays = new Date(currentYear, currentMonth + 1, 0).getDate();
 
-    // Espaços vazios iniciais
     for (let i = 0; i < firstDayIndex; i++) {
         const emptyCell = document.createElement('div');
         emptyCell.classList.add('day-cell', 'empty-cell');
@@ -81,33 +77,25 @@ function renderCalendar() {
         daysGrid.appendChild(emptyCell);
     }
 
-    // Renderizar dias do mês
     for (let day = 1; day <= totalDays; day++) {
         const dayCell = document.createElement('div');
         dayCell.classList.add('day-cell');
         dayCell.textContent = day;
 
-        // Verificar se o dia já passou
-        const isPastDay = day < currentDay;
-
-        if (isPastDay) {
-            // Se já passou, adiciona classe visual de desativado e NÃO permite clique
+        if (day < currentDay) {
             dayCell.classList.add('past-day');
         } else {
-            // Se é hoje ou futuro, permite o clique para agendar
             dayCell.addEventListener('click', () => {
                 eventDateInput.value = day;
                 scheduleModal.classList.add('open');
             });
         }
 
-        // Destacar o dia de hoje
         if (day === currentDay) {
             dayCell.classList.add('active-day');
         }
 
-        // Verificar se há evento neste dia
-        const hasEvent = scheduledEvents.some(ev => ev.date === day);
+        const hasEvent = scheduledEvents.some(ev => ev.dia === day);
         if (hasEvent) {
             dayCell.classList.add('highlight-day');
         }
@@ -125,7 +113,7 @@ function renderEvents() {
         card.innerHTML = `
             <div class="event-info">
                 <h4>Irrigação Programada</h4>
-                <span>Dia ${ev.date} • Início: ${ev.init} • Duração: ${ev.duration} min</span>
+                <span>Dia ${ev.dia} • Início: ${ev.horario} • Duração: ${ev.duracao} min</span>
             </div>
             <span class="event-badge">Agendado</span>
         `;
@@ -133,17 +121,15 @@ function renderEvents() {
     });
 }
 
-// Controle do Modal (Fechar)
 closeModalBtn.addEventListener('click', () => {
     scheduleModal.classList.remove('open');
 });
 
-// Adicionar Novo Agendamento pelo Formulário
-scheduleForm.addEventListener('submit', (e) => {
+scheduleForm.addEventListener('submit', async (e) => {
     e.preventDefault();
     
     const date = parseInt(eventDateInput.value);
-    const init = document.getElementById('eventTime').value; // Ex: "14:30"
+    const init = document.getElementById('eventTime').value;
     const duration = parseInt(document.getElementById('eventDuration').value);
 
     if (!date || !init || !duration) {
@@ -151,36 +137,54 @@ scheduleForm.addEventListener('submit', (e) => {
         return;
     }
 
-    // Validação de Hora para o dia de hoje
     const today = new Date();
     const currentDay = today.getDate();
-    const currentMonth = today.getMonth();
-    const currentYear = today.getFullYear();
 
-    // Se o usuário selecionou o dia de hoje, precisamos checar o horário
     if (date === currentDay) {
         const [hours, minutes] = init.split(':').map(Number);
-        
         const selectedTimeMinutes = hours * 60 + minutes;
         const currentTimeMinutes = today.getHours() * 60 + today.getMinutes();
 
         if (selectedTimeMinutes <= currentTimeMinutes) {
             alert('Você não pode agendar uma irrigação para um horário que já passou hoje!');
-            return; // Impede o envio do formulário
+            return;
         }
     }
 
-    // Se passou na validação, adiciona o evento normalmente
-    scheduledEvents.push({ date, init, duration });
-    enviar_agendamento(date,init,duration);
-    renderCalendar();
-    renderEvents();
+    // Envia para o backend salvar no Firebase
+    await enviar_agendamento(date, init, duration);
+    
+    // Recarrega os dados do banco e atualiza a tela
+    await carregarDadosDoBanco();
+
     scheduleForm.reset();
     scheduleModal.classList.remove('open');
 });
 
-// Inicialização
+// Função para buscar o estado atual e agendamentos direto do Firebase via FastAPI ao carregar a página
+async function carregarDadosDoBanco() {
+    try {
+        // Busca estado da bomba
+        const resBomba = await coletar_estado_bomba();
+        if (resBomba && typeof resBomba.estado !== 'undefined') {
+            isPumpOn = resBomba.estado;
+            updatePumpUI();
+        }
+
+        // Busca agendamentos
+        const resAgendamentos = await coletar_agendamentos();
+        if (Array.isArray(resAgendamentos)) {
+            scheduledEvents = resAgendamentos;
+        }
+
+        renderCalendar();
+        renderEvents();
+    } catch (error) {
+        console.error("Erro ao sincronizar com o backend:", error);
+    }
+}
+
+// Inicialização da Aplicação
 window.addEventListener('DOMContentLoaded', () => {
-    renderCalendar();
-    renderEvents();
+    carregarDadosDoBanco();
 });

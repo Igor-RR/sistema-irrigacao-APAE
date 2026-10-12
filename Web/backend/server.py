@@ -93,7 +93,7 @@ def consultar_agendamentos():
         lista_formatada = []
 
         # Converte o json em lista de tuplas e separa chaves de valores
-        for chave, valor in dados.itens():
+        for chave, valor in dados.items():
             
             agendamento = {
                 "id":chave,

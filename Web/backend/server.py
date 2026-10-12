@@ -150,6 +150,49 @@ def enviar_agendamento(dado: Agendamento):
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
+# ==========================================
+#         ROTAS DE TESTE (MOCK ESP32)
+# ==========================================
+
+# Simula o ESP32 avisando que terminou uma rega específica
+@app.put("/api/teste/concluir/{id_evento}")
+def simular_esp32_conclusao(id_evento: str):
+    try:
+        # Acessa diretamente o nó do evento específico pela Hash (ID)
+        conexao = db.reference(f"/programacoes/{id_evento}")
+        
+        if conexao.get(): # Verifica se o evento existe
+            conexao.update({"concluido": True}) # Atualiza apenas o status
+            return {"status": "sucesso", "mensagem": f"Evento {id_evento} marcado como concluído!"}
+        else:
+            raise HTTPException(status_code=404, detail="Evento não encontrado no Firebase.")
+            
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+# Rota para testar o Relatório Semanal (Gera 8 concluídos)
+@app.get("/api/teste/gerar_relatorio")
+def gerar_dados_teste_relatorio():
+    try:
+        conexao = db.reference("/programacoes")
+        
+        # Cria 8 eventos fictícios já marcados como concluídos
+        for i in range(1, 9):
+            conexao.push({
+                "dia": i,
+                "horario": "10:00",
+                "duracao": 20,
+                "concluido": True
+            })
+            
+        return {
+            "status": "sucesso", 
+            "mensagem": "8 eventos concluídos foram injetados no Firebase! Volte ao painel principal (Dashboard) e recarregue a página para ver a mágica acontecer."
+        }
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
 
 
 # Subir servidor

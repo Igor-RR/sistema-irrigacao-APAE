@@ -43,6 +43,7 @@ class Agendamento(BaseModel):
     dia: int
     horario: str
     duracao: int
+    concluido: bool = False
 
 # CSS e JS
 app.mount("/static", StaticFiles(directory="../frontend/static"), name="static")
@@ -71,48 +72,50 @@ def consultar_estado_botao():
         raise HTTPException(status_code=500, detail=str(e))
 
 
-# Rota para consultar consultar todos os eventos (Frontend <- RTDB)
+# Rota para consultar todos os eventos (Frontend <- RTDB)
 @app.get("/api/agendamento")
 def consultar_agendamentos():
     try:
         conexao = db.reference("/programacoes")
         dados = conexao.get()
-
-         # O Firebase retorna uma um json para dados armazendos com push, desta forma:
-
-        # dados = {
-        # "-chave": {"dia": 20, "horario": "14:30", "duracao": 15},
-        # "-chave": {"dia": 22, "horario": "08:00", "duracao": 30}
-        # }
         
-
-        #  Se não existir nada no banco, retorna uma lista vazia
+        # O novo padrão de resposta agora envia as duas listas separadas
         if not dados:
-            return []
+            return {"pendentes": [], "relatorio": []}
 
-        lista_formatada = []
+        pendentes = []
+        concluidos = []
 
-        # Converte o json em lista de tuplas e separa chaves de valores
         for chave, valor in dados.items():
-            
             agendamento = {
-                "id":chave,
-                "dia":valor.get("dia"),
-                "horario":valor.get("horario"),
-                "duracao":valor.get("duracao")
+                "id": chave,
+                "dia": valor.get("dia"),
+                "horario": valor.get("horario"),
+                "duracao": valor.get("duracao"),
+                "concluido": valor.get("concluido", False) # Garante que se não existir, é False
             }
 
-            lista_formatada.append(agendamento)
+            # Separa os dados lidos nas suas respetivas listas
+            if agendamento["concluido"] == True:
+                concluidos.append(agendamento)
+            else:
+                pendentes.append(agendamento)
 
-        if len(lista_formatada) < 8:
-            return lista_formatada
-        else:
-            # Apagua os dados do banco de dados
-            conexao.delete()
-            # Envia a lista formatada para o frontend exibir o relatorio semanal
-            return lista_formatada
+        # A regra de limpar o banco aplica-se APENAS aos concluídos
+        relatorio_gerado = []
+        if len(concluidos) >= 8:
+            for item in concluidos:
+                # Apaga apenas o nó do agendamento concluído usando a sua hash (chave)
+                db.reference(f"/programacoes/{item['id']}").delete()
+            
+            # Os concluídos vão para o relatório, e o banco fica limpo deles
+            relatorio_gerado = concluidos 
+            
+        return {"pendentes": pendentes, "relatorio": relatorio_gerado}
+            
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
+    
 
 # Rota para o envio do estado do botão da bomba (Frontend -> RTDB)
 @app.post("/api/botaoBomba")
@@ -132,14 +135,14 @@ def enviar_estado_botao(dado:EstadoBomba):
 
 # Rota para o envio da programação da bomba (Frontend -> RTDB)
 @app.post("/api/agendamento")
-def enviar_agendamento(dado:Agendamento):
+def enviar_agendamento(dado: Agendamento):
     try:
-        conexao = db.reference("/programacoes") # Conexão com Realtimedatabase
-        # o método push envia para o payload para o Realtime Database
+        conexao = db.reference("/programacoes")
         novo_evento = conexao.push({
-            "dia":dado.dia,
-            "horario":dado.horario,
-            "duracao":dado.duracao
+            "dia": dado.dia,
+            "horario": dado.horario,
+            "duracao": dado.duracao,
+            "concluido": False # Todo novo agendamento nasce como pendente
         })
 
         print(f"Agendamento enviado ao FireBase com ID:{novo_evento.key}")

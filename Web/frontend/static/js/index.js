@@ -186,7 +186,7 @@ scheduleForm.addEventListener('submit', async (e) => {
     scheduleModal.classList.remove('open');
 });
 
-// FUNÇÃO ATUALIZADA PARA TRATAR O RELATÓRIO
+// FUNÇÃO ATUALIZADA PARA TRATAR PENDENTES E CONCLUÍDOS
 async function carregarDadosDoBanco() {
     try {
         const resBomba = await coletar_estado_bomba();
@@ -196,16 +196,20 @@ async function carregarDadosDoBanco() {
         }
 
         const resAgendamentos = await coletar_agendamento();
-        if (Array.isArray(resAgendamentos)) {
-            // Se vierem 8 ou mais, o backend limpou o banco e mandou o relatório!
-            if (resAgendamentos.length >= 8) {
-                weeklyReport = resAgendamentos;
-                localStorage.setItem('weeklyReport', JSON.stringify(weeklyReport)); // Guarda localmente
-                scheduledEvents = []; // Limpa o calendário da interface atual
-            } else {
-                scheduledEvents = resAgendamentos;
+        
+        // Verifica se recebemos o novo formato com as duas listas separadas
+        if (resAgendamentos && resAgendamentos.pendentes) {
+            
+            // 1. A interface (calendário) recebe apenas os pendentes
+            scheduledEvents = resAgendamentos.pendentes;
+            
+            // 2. Se o backend enviou um relatório (8 ou mais concluídos), nós guardamos
+            if (resAgendamentos.relatorio && resAgendamentos.relatorio.length > 0) {
+                weeklyReport = resAgendamentos.relatorio;
+                localStorage.setItem('weeklyReport', JSON.stringify(weeklyReport));
             }
-            updateNotificationUI(); // Aciona o sininho se o relatório existir
+            
+            updateNotificationUI();
         }
 
         renderCalendar();

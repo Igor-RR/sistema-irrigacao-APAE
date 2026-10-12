@@ -24,9 +24,9 @@ export async function enviar_agendamento(dia,horario,duracao) {
 }
 
 export async function coletar_agendamento() {
-    const resposta = await fetch ("api/agendamento")
+    const resposta = await fetch ("/api/agendamento")
 
-    if (!resposta){
+    if (!resposta.ok){
         throw new Error(`Erro HTTP! Status: ${resposta.status}`)
     }
 
@@ -39,7 +39,7 @@ export async function coletar_estado_bomba() {
 
     const resposta = await fetch("/api/botaoBomba")
     
-    if (!resposta){
+    if (!resposta.ok){
         throw new Error(`Erro HTTP! Status: ${resposta.status}`)
     }
 

@@ -77,7 +77,40 @@ def consultar_agendamentos():
     try:
         conexao = db.reference("/programacoes")
         dados = conexao.get()
-        return dados if dados else {"Não existem agendamentos cadastrados"}
+
+         # O Firebase retorna uma um json para dados armazendos com push, desta forma:
+
+        # dados = {
+        # "-chave": {"dia": 20, "horario": "14:30", "duracao": 15},
+        # "-chave": {"dia": 22, "horario": "08:00", "duracao": 30}
+        # }
+        
+
+        #  Se não existir nada no banco, retorna uma lista vazia
+        if not dados:
+            return []
+
+        lista_formatada = []
+
+        # Converte o json em lista de tuplas e separa chaves de valores
+        for chave, valor in dados.itens():
+            
+            agendamento = {
+                "id":chave,
+                "dia":valor.get("dia"),
+                "horario":valor.get("horario"),
+                "duracao":valor.get("duracao")
+            }
+
+            lista_formatada.append(agendamento)
+
+        if len(lista_formatada) < 8:
+            return lista_formatada
+        else:
+            # Apagua os dados do banco de dados
+            conexao.delete()
+            # Envia a lista formatada para o frontend exibir o relatorio semanal
+            return lista_formatada
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
@@ -89,8 +122,10 @@ def enviar_estado_botao(dado:EstadoBomba):
         novo_estado = conexao.set({
             "estado":dado.estado
         })
-        print(f"Estado do botão atualizado no FireBase, ID:{novo_estado.key}")
-        return {"status": "sucesso", "id": novo_estado.key}
+
+        print(f"Estado do botão atualizado no FireBase para: {dado.estado}")
+        return {"status": "sucesso", "estado": dado.estado}
+    
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
         

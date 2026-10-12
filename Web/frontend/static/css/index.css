@@ -561,3 +561,27 @@ body {
     background-color: transparent;
     border-color: transparent;
 }
+
+/* NOTIFICAÇÕES (RELATÓRIO) */
+.notification-wrapper {
+    position: relative;
+}
+
+.notification-badge {
+    position: absolute;
+    top: -2px;
+    right: -2px;
+    width: 12px;
+    height: 12px;
+    background-color: var(--accent-red);
+    border-radius: 50%;
+    border: 2px solid var(--bg-card);
+    box-shadow: 0 0 6px rgba(231, 111, 81, 0.5);
+    animation: pulseBadge 1.5s infinite;
+}
+
+@keyframes pulseBadge {
+    0% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(231, 111, 81, 0.7); }
+    70% { transform: scale(1); box-shadow: 0 0 0 6px rgba(231, 111, 81, 0); }
+    100% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(231, 111, 81, 0); }
+}

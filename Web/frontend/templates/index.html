@@ -40,6 +40,13 @@
 
                 <div class="header-right">
                     <span class="user-profile">Sistema de Irrigação - APAE</span>
+                    <!-- Botão de Notificação -->
+                    <div class="notification-wrapper">
+                        <button class="icon-btn" id="notificationBtn" title="Relatório Semanal">
+                            <i class="fa-solid fa-bell"></i>
+                            <span class="notification-badge" id="notificationBadge" style="display: none;"></span>
+                        </button>
+                    </div>
                     <button class="icon-btn" title="Buscar"><i class="fa-solid fa-magnifying-glass"></i></button>
                 </div>
             </header>
@@ -132,6 +139,23 @@
                     <button type="submit" class="btn-save">Salvar</button>
                 </div>
             </form>
+        </div>
+    </div>
+
+    <!-- MODAL PARA O RELATÓRIO SEMANAL -->
+    <div class="modal-overlay" id="reportModal">
+        <div class="modal-content">
+            <h3>Relatório Semanal</h3>
+            <p class="panel-desc" style="margin-bottom: 15px;">Estes foram os agendamentos concluídos nesta semana:</p>
+            
+            <div class="events-list" id="reportList" style="max-height: 250px; margin-bottom: 20px;">
+                <!-- Preenchido via JS -->
+            </div>
+            
+            <div class="modal-actions">
+                <button type="button" class="btn-cancel" id="closeReportBtn">Fechar</button>
+                <button type="button" class="btn-save" id="clearReportBtn">Limpar Relatório</button>
+            </div>
         </div>
     </div>
 

@@ -2,6 +2,9 @@
 from dotenv import load_dotenv
 import os
 
+#Criptografia
+from passlib.hash import sha512_crypt as crypt
+
 # Importação do servidor fastapi
 from fastapi import FastAPI, HTTPException,Request
 from fastapi.responses import HTMLResponse
@@ -19,6 +22,8 @@ from firebase_admin import credentials, db
 #Carregamento de variáveis de ambiente
 load_dotenv()
 firebase_url = os.getenv("FIREBASE_URL")
+senha = os.getenv("SENHA")
+usuario = os.getenv("USUARIO")
 
 if not firebase._apps:
     # inicializa o sdk python do firebase
@@ -48,15 +53,24 @@ class Agendamento(BaseModel):
 # CSS e JS
 app.mount("/static", StaticFiles(directory="../frontend/static"), name="static")
 
-# Estado da Bomba:
-estado_bomba = {"estado":False}
+# ----- Autenticação ------ #
+
+# # Em construção
+# @app.post("/api/login")
+# def login():
+
+#     senha_requisicao = Request.body()
+
+
+#     print("oi")
+#     return 
 
 # Carregar dashboard
 @app.get("/", response_class=HTMLResponse)
 def painel_principal(request:Request):
     #Preciso implemnatr uma requidição ao bd, para verificar os itens cadastrados e concluidos
     return templates.TemplateResponse(
-        name="index.html",
+        name="login.html",
         request=request,
         context={}
         )
@@ -150,6 +164,18 @@ def enviar_agendamento(dado: Agendamento):
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
+# # Rota para cancelar agendamento (Frontend -> RTDB)
+# # Em construção
+# @app.delete("/api/cancelarAgendamento")
+# def cancelar_agendamento(dado: Agendamento):
+#     try:
+#         conexao = db.reference("/programacoes")
+#     except Exception as e:
+#         raise HTTPException(status_code=500, detail=str(e))
+
+# @app.delete("/api/cancelarAgendamento")
+    
+
 # ==========================================
 #         ROTAS DE TESTE (MOCK ESP32)
 # ==========================================
@@ -192,8 +218,6 @@ def gerar_dados_teste_relatorio():
         }
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
-
-
 
 # Subir servidor
 if __name__ == "__main__":

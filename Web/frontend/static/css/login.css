@@ -1,0 +1,75 @@
+/* Container que centraliza o login na tela toda */
+.login-wrapper {
+    width: 100vw;
+    height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: var(--bg-main);
+}
+
+/* Caixa branca (card) do login */
+.login-card {
+    background-color: var(--bg-card);
+    border: 1px solid var(--border-color);
+    padding: 40px 35px;
+    border-radius: 20px;
+    width: 100%;
+    max-width: 380px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+    text-align: center;
+}
+
+/* Ícone da plantinha */
+.login-logo {
+    font-size: 38px;
+    color: var(--accent-yellow-solid);
+    background: rgba(233, 181, 0, 0.1);
+    width: 80px;
+    height: 80px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 20px;
+    margin-bottom: 20px;
+}
+
+.login-card h2 {
+    color: var(--text-main);
+    font-size: 22px;
+    font-weight: 700;
+    margin-bottom: 5px;
+}
+
+.login-card p {
+    color: var(--text-muted);
+    font-size: 13px;
+    margin-bottom: 30px;
+}
+
+/* Ajuste dos campos do formulário para alinhar à esquerda */
+.login-form .form-group {
+    text-align: left;
+    margin-bottom: 20px;
+}
+
+/* Botão principal de Acessar */
+.btn-login {
+    width: 100%;
+    padding: 12px;
+    background-color: var(--accent-yellow-solid);
+    color: #ffffff;
+    border: none;
+    border-radius: 8px;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    box-shadow: 0 4px 12px rgba(233, 181, 0, 0.3);
+    transition: transform 0.2s, box-shadow 0.2s;
+    margin-top: 10px;
+}
+
+.btn-login:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 15px rgba(233, 181, 0, 0.4);
+}

@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Irrigação APAE - Login</title>
+    
+    <!-- CSS Principal (aproveita as variáveis de cores e fontes gerais) -->
+    <link rel="stylesheet" href="{{ url_for('static', path='css/index.css') }}">
+    
+    <!-- CSS Específico da tela de Login -->
+    <link rel="stylesheet" href="{{ url_for('static', path='css/login.css') }}">
+    
+    <!-- FontAwesome e Google Fonts -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="icon" href="{{ url_for('static', path='assets/APAE-logo.jpeg') }}">
+</head>
+<body>
+
+    <div class="login-wrapper">
+        <div class="login-card">
+            
+            <!-- Logo estilo barra lateral -->
+            <div class="login-logo">
+                <img href="{{ url_for('static', path='assets/APAE-logo.jpeg') }}"/>
+            </div>
+            
+            <h2>Bem-vindo(a)</h2>
+            <p>Sistema de Irrigação - APAE</p>
+
+            <!-- Formulário de Login -->
+            <form class="login-form" id="loginForm">
+                <div class="form-group">
+                    <label for="username">Usuário</label>
+                    <input type="text" id="username" name="username" placeholder="Digite seu usuário" required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="password">Senha</label>
+                    <input type="password" id="password" name="password" placeholder="Digite sua senha" required>
+                </div>
+
+                <button type="submit" class="btn-login">Acessar Painel</button>
+            </form>
+
+        </div>
+    </div>
+
+    <!-- Script específico da tela de Login -->
+    <script type="module" src="{{ url_for('static', path='js/login.js') }}"></script>
+</body>
+</html>
